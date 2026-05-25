@@ -1,6 +1,8 @@
 package arnett.uIUniverse.uiTypes.slotTypes;
 
+import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.inventory.Inventory;
 
 public abstract class BaseSlot {
 
@@ -13,7 +15,7 @@ public abstract class BaseSlot {
     /**
      * Called when content is selected and is used to call the more general method onSelect
      */
-    private void contentSelectedHandler(PlayerEvent e)
+    private void contentSelectedHandler(Player player, Inventory inventory, int slot)
     {
         onContentSelected(e);
         onSelect(e);

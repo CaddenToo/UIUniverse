@@ -3,6 +3,7 @@ package arnett.uIUniverse.uiTypes.ui.menus;
 import arnett.uIUniverse.uiTypes.slotTypes.BaseSlot;
 import arnett.uIUniverse.uiTypes.slotTypes.DisplaySlot;
 import arnett.uIUniverse.uiTypes.ui.UniverseInventoryHolder;
+import org.bukkit.NamespacedKey;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.yaml.snakeyaml.Yaml;
 
@@ -30,18 +31,10 @@ public abstract class Menu implements UniverseInventoryHolder {
         return new DisplaySlot();
     }
 
-    /**
-     * @return The name used to identify this menu
-     */
-    public abstract String getId();
 
     /**
-     * Called when the menu is closed
+     * Called when a menu with this ID is closed
      */
     public abstract void onMenuClose(InventoryCloseEvent e);
 
-    private Yaml saveToYaml()
-    {
-
-    }
 }
