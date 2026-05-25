@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/UIUniverse.main.iml" filepath="$PROJECT_DIR$/.idea/modules/UIUniverse.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/UIUniverse.test.iml" filepath="$PROJECT_DIR$/.idea/modules/UIUniverse.test.iml" />
     </modules>
   </component>
 </project>

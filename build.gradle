@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id("xyz.jpenilla.run-paper") version "2.3.1"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.19"
 }
 
 group = 'arnett'
@@ -12,6 +13,7 @@ repositories {
         name = "papermc-repo"
         url = "https://repo.papermc.io/repository/maven-public/"
     }
+    maven { url "https://repo.dmulloy2.net/repository/public/" }
     maven {
         url = uri("https://maven.pkg.github.com/kangawooo-events/caddamands")
         credentials {
@@ -23,6 +25,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
     compileOnly("cd.arnett:caddamands:3.A.2")
 }
 

@@ -5,7 +5,7 @@ import org.bukkit.event.player.PlayerEvent;
 public class StorageSlot extends BaseSlot {
 
     @Override
-    public boolean isMovable() {
+    public final boolean isMovable() {
         return true;
     }
 

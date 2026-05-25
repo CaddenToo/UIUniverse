@@ -1,0 +1,6 @@
+name: UIUniverse
+version: '0.1'
+main: arnett.uIUniverse.UIUniverse
+api-version: '1.21'
+authors: [ Arnett, Catten, Cadden ]
+description: Moving environment
