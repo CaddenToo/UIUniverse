@@ -26,7 +26,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
-    compileOnly("cd.arnett:caddamands:3.A.2")
+    compileOnly("cd.arnett:caddamands:3.A.3")
 }
 
 tasks {
