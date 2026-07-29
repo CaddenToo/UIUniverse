@@ -8,39 +8,40 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
 
 public abstract class BaseSlot {
 
-    protected ItemStack content;
+    protected ItemStack definedContent;
 
     public BaseSlot()
     {
-        setContent(ItemStack.empty());
+        setDefinedContent(ItemStack.empty());
     }
 
     public BaseSlot(ItemStack content)
     {
-        setContent(content);
+        setDefinedContent(content);
     }
 
     public BaseSlot(Material contentMat, int amount)
     {
-        setContent(ItemStack.of(contentMat, amount));
+        setDefinedContent(ItemStack.of(contentMat, amount));
     }
 
     public BaseSlot(ConfigurationSection yaml)
     {
-        setContent(yaml.getItemStack(getIdentifierAsYamlKey() + ".item"));
+        setDefinedContent(yaml.getItemStack(getIdentifierAsYamlKey() + ".item"));
     }
 
     /**
      * Called when content is changed (i.e. when the player tries to move
      * the item in this slot or place a new item in)
      */
-    public void onSelect(Player player, Inventory inventory, int slot) {}
+    public void onSelect(Player player, InventoryView view, Inventory inventory, int slot) {}
 
     /**
      * @return Whether the content in this slot can be changed
@@ -53,7 +54,7 @@ public abstract class BaseSlot {
 
         String key = getIdentifierAsYamlKey() + '.';
 
-        yaml.set(key + "item", content);
+        yaml.set(key + "item", definedContent);
 
         return yaml;
     }
@@ -65,14 +66,14 @@ public abstract class BaseSlot {
         return getIdentifier().toString().replace(':', '-');
     }
 
-    public ItemStack getContent()
+    public ItemStack getDefinedContent()
     {
-        return content;
+        return definedContent;
     }
 
-    public void setContent(ItemStack stack)
+    public void setDefinedContent(ItemStack stack)
     {
-        this.content = stack;
+        this.definedContent = stack;
     }
 
     public DyeColor getDisplayColor()
@@ -87,6 +88,6 @@ public abstract class BaseSlot {
 
     public void setContentAmount(int amount)
     {
-        content.setAmount(amount);
+        definedContent.setAmount(amount);
     }
 }

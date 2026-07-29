@@ -10,6 +10,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 public class SaveEditButton extends ButtonSlot {
@@ -30,7 +31,7 @@ public class SaveEditButton extends ButtonSlot {
     }
 
     @Override
-    public void execute(Player player, Inventory inventory, int slot, PromptInput<?>... parameters) {
+    public void execute(Player player, InventoryView view, Inventory inventory, int slot, PromptInput<?>... parameters) {
 
         System.out.println("SAVING!");
 

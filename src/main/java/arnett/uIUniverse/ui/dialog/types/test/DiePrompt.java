@@ -23,7 +23,8 @@ public class DiePrompt extends ConfirmationPrompter {
                 view.getBoolean("First") &&
                 view.getBoolean("Second") &&
                 view.getBoolean("Third") &&
-                view.getBoolean("Fourth")
+                view.getBoolean("Fourth") &&
+                view.getBoolean("Fifth")
                 ))
         {
             player.sendMessage("You did not agree to the terms");
@@ -77,7 +78,8 @@ public class DiePrompt extends ConfirmationPrompter {
                 DialogInput.bool("First", MiniMessage.miniMessage().deserialize("<i>Sign away <gradient:#0f8500:#1eff00>life savings</i>...")).build(),
                 DialogInput.bool("Second", MiniMessage.miniMessage().deserialize("<i>Forgo last meal</i>...")).build(),
                 DialogInput.bool("Third", MiniMessage.miniMessage().deserialize("<i>Breath your <red>last</red> breath</i>...")).build(),
-                DialogInput.bool("Fourth", MiniMessage.miniMessage().deserialize("<i>Admit cats are <bold>better</bold> than dogs</i>...")).build()
+                DialogInput.bool("Fourth", MiniMessage.miniMessage().deserialize("<i>Denounce your <color:#a10d00>last will</color:#a10d00> and <color:#a11f64>testament</color:#a11f64></i>...")).build(),
+                DialogInput.bool("Fifth", MiniMessage.miniMessage().deserialize("<i>Admit cats are <bold>better</bold> than dogs</i>...")).build()
         );
     }
 }

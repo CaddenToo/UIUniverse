@@ -1,11 +1,8 @@
 package arnett.uIUniverse;
 
-import arnett.uIUniverse.commands.EditMenu;
-import arnett.uIUniverse.commands.PromptTest;
-import arnett.uIUniverse.commands.RegenMenu;
+import arnett.uIUniverse.commands.*;
 import arnett.uIUniverse.commands.list.ListMenus;
 import arnett.uIUniverse.commands.list.ListSlots;
-import arnett.uIUniverse.commands.OpenMenu;
 import arnett.uIUniverse.listeners.UIMenuListener;
 import arnett.uIUniverse.listeners.UISlotListener;
 import arnett.uIUniverse.ui.inventory.slotTypes.DisplaySlot;

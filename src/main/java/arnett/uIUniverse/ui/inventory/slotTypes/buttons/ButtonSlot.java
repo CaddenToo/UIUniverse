@@ -12,14 +12,16 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public abstract class ButtonSlot extends DisplaySlot {
 
-    protected PromptInput<?>[] parameters;
+    public PromptInput<?>[] parameters;
 
     public ButtonSlot(ItemStack displayItem)
     {
@@ -63,17 +65,17 @@ public abstract class ButtonSlot extends DisplaySlot {
     }
 
 
-    public abstract void execute(Player player, Inventory inventory, int slot, PromptInput<?>... parameters);
+    public abstract void execute(Player player, InventoryView view, Inventory inventory, int slot, PromptInput<?>... parameters);
 
     public abstract PromptInput<?>[] getDefaultParameters();
 
 
     @Override
-    public void onSelect(Player player, Inventory inventory, int slot) {
+    public void onSelect(Player player, InventoryView view, Inventory inventory, int slot) {
 
         //todo read parameters from yaml file or pdc of item
 
-        execute(player, inventory, slot, parameters);
+        execute(player, view, inventory, slot, parameters);
     }
 
 
@@ -104,6 +106,8 @@ public abstract class ButtonSlot extends DisplaySlot {
         for(int i = 0; i < parameters.length; i++)
         {
             String value = parameters[i].getValue().toString();
+
+            System.out.println(parameters[i].getValue().toString());
 
             if(value.length() > 10)
             {

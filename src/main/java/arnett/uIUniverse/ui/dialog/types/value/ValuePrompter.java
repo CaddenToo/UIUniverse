@@ -2,6 +2,9 @@ package arnett.uIUniverse.ui.dialog.types.value;
 
 import arnett.uIUniverse.ui.dialog.types.confirmation.ConfirmationPrompter;
 import arnett.uIUniverse.ui.dialog.types.value.parameters.PromptInput;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.datafixers.util.Function3;
+import io.papermc.paper.command.brigadier.CommandSourceStack;
 import io.papermc.paper.dialog.DialogResponseView;
 import io.papermc.paper.registry.data.dialog.ActionButton;
 import io.papermc.paper.registry.data.dialog.action.DialogAction;
@@ -9,9 +12,11 @@ import io.papermc.paper.registry.data.dialog.input.DialogInput;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.event.ClickCallback;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.apache.commons.lang3.function.TriFunction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.function.Function;
 
 @SuppressWarnings("UnstableApiUsage")
 public class ValuePrompter extends ConfirmationPrompter {
@@ -24,8 +29,14 @@ public class ValuePrompter extends ConfirmationPrompter {
 
     String title;
     List<PromptInput<?>> inputs;
-    Runnable yesCallback;
-    Runnable noCallback;
+
+    @FunctionalInterface
+    public interface DialogCallback {
+        void callback(DialogResponseView view, Audience audience);
+    };
+
+    DialogCallback yesCallback;
+    DialogCallback noCallback;
 
     //endregion
 
@@ -37,7 +48,7 @@ public class ValuePrompter extends ConfirmationPrompter {
                        -  Constructors  -
     =================================================================================================*/
 
-    public ValuePrompter(String title, List<PromptInput<?>> inputs, Runnable yesCallback, Runnable noCallback) {
+    public ValuePrompter(String title, List<PromptInput<?>> inputs, DialogCallback yesCallback, DialogCallback noCallback) {
         this.title = title;
         this.inputs = inputs;
         this.yesCallback = yesCallback;
@@ -66,12 +77,19 @@ public class ValuePrompter extends ConfirmationPrompter {
 
     @Override
     public final void onYes(DialogResponseView view, Audience audience) {
-        yesCallback.run();
+
+        inputs.forEach(input -> {
+            input.readFromDialog(view);
+        });
+
+        if(yesCallback != null)
+            yesCallback.callback(view, audience);
     }
 
     @Override
     public final void onNo(DialogResponseView view, Audience audience) {
-        noCallback.run();
+        if(noCallback != null)
+            noCallback.callback(view, audience);
     }
 
     @Override

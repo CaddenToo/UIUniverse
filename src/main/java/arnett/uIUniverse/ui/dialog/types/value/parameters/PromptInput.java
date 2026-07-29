@@ -17,7 +17,7 @@ public abstract class PromptInput<T> {
      * The value tracked by this class, ex// if you want to prompt a float from the player,
      * this would track that float value
      */
-    protected T value;
+    protected volatile T value;
 
     /**
      * Name used to identify this input in Dialogs
@@ -44,6 +44,7 @@ public abstract class PromptInput<T> {
     {
         value = defaultValue;
         this.name = name;
+        displayName = name;
     }
 
     //endregion

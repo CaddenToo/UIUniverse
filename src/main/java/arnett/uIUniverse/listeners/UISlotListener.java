@@ -33,7 +33,7 @@ public class UISlotListener implements Listener {
         if(rawClickedSlot >= 0 && rawClickedSlot < topInventory.getSize())
         {
             BaseSlot clickedSlot = holder.getBaseSlot(e.getSlot());
-            clickedSlot.onSelect(player, topInventory, rawClickedSlot);
+            clickedSlot.onSelect(player, e.getView(), topInventory, rawClickedSlot);
 
             //stop if this slot isn't movable
             if(!clickedSlot.isMovable())

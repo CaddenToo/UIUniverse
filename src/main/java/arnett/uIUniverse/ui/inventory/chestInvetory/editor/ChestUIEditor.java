@@ -5,6 +5,7 @@ import arnett.uIUniverse.ui.inventory.slotTypes.BaseSlot;
 import arnett.uIUniverse.ui.inventory.slotTypes.DisplaySlot;
 import arnett.uIUniverse.ui.inventory.slotTypes.SlotManager;
 import arnett.uIUniverse.ui.inventory.slotTypes.StorageSlot;
+import arnett.uIUniverse.ui.inventory.slotTypes.buttons.editing.EditSlotParametersButton;
 import arnett.uIUniverse.ui.inventory.slotTypes.buttons.editing.SaveEditButton;
 import arnett.uIUniverse.ui.inventory.chestInvetory.ChestUIHolder;
 import io.papermc.paper.persistence.PersistentDataContainerView;
@@ -17,6 +18,7 @@ import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -27,8 +29,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 public class ChestUIEditor extends ChestUIHolder {
@@ -58,6 +62,8 @@ public class ChestUIEditor extends ChestUIHolder {
     boolean reverseEditor = false;
 
     public HashMap<Character, BaseSlot> slotRepresentations = new HashMap<>();
+
+    BaseSlot[][] editorSlots;
 
 
     /**
@@ -99,24 +105,51 @@ public class ChestUIEditor extends ChestUIHolder {
     /**
      * Defined the slots used for the editor section of the UI
      */
-    protected BaseSlot[][] getEditorSlots()
+    protected BaseSlot[][] buildEditorSlots()
     {
+        ItemStack editSlotStack = ItemStack.of(Material.DIAMOND, 1);
+        editSlotStack.editMeta(pdc -> {
+            pdc.displayName(
+                    MiniMessage.miniMessage().deserialize("<bold><blue>Edit Slot")
+            );
+            pdc.lore(
+                    List.of(
+                            MiniMessage.miniMessage().deserialize("Click holding ItemSlot Representation to edit parameters")
+                    )
+            );
+        });
+
+        ItemStack saveEditStack = ItemStack.of(Material.GREEN_BANNER, 1);
+        saveEditStack.editMeta(pdc -> {
+            pdc.displayName(
+                    MiniMessage.miniMessage().deserialize("<bold><green>Save Work")
+            );
+        });
+
         return new BaseSlot[][]{
                 {
                         new DisplaySlot(Material.GLOW_ITEM_FRAME, 1),
-                        new DisplaySlot(Material.DIAMOND, 1),
+                        new EditSlotParametersButton(editSlotStack),
                         null,
                         null,
                         new DisplaySlot(Material.DIRT, 1),
                         new DisplaySlot(Material.AXOLOTL_SPAWN_EGG, 1),
                         new DisplaySlot(Material.LAVA_BUCKET, 1),
                         null,
-                        new SaveEditButton(Material.GREEN_BANNER, 1),
+                        new SaveEditButton(saveEditStack),
                 }
         };
     }
 
+    protected BaseSlot[][] getEditorSlots()
+    {
+        if(editorSlots == null)
+        {
+            editorSlots = buildEditorSlots();
+        }
 
+        return editorSlots;
+    }
 
     @Override
     public BaseSlot getDefaultSlot() {
@@ -176,13 +209,13 @@ public class ChestUIEditor extends ChestUIHolder {
             for (k = 0; k < line.length(); k++)
             {
                 //we are within what was defined for this line, so get the defined slot's content
-                inv.setItem(k + offset, definitions.getOrDefault(line.charAt(k), getDefaultSlot()).getContent());
+                inv.setItem(k + offset, definitions.getOrDefault(line.charAt(k), getDefaultSlot()).getDefinedContent());
             }
 
             //we are over what was defined for this line, so the rest gets filled with default slots
             for (; k < 9; k++)
             {
-                inv.setItem(k + offset, definitions.get(' ').getContent());
+                inv.setItem(k + offset, definitions.get(' ').getDefinedContent());
             }
         }
 
@@ -195,7 +228,7 @@ public class ChestUIEditor extends ChestUIHolder {
             for (k = 0; k < line.length; k++)
             {
                 //we are within what was defined for this line, so get the defined slot's content
-                inv.setItem(k + offset, line[k] == null ? ItemStack.empty() : line[k].getContent());
+                inv.setItem(k + offset, line[k] == null ? ItemStack.empty() : line[k].getDefinedContent());
             }
 
             //we are over what was defined for this line, so the rest gets filled with air
@@ -418,8 +451,6 @@ public class ChestUIEditor extends ChestUIHolder {
             return ' ';
         }
 
-        ItemMeta meta = stack.getItemMeta();
-
         // if this is a slot representation it may already be defined
         // and if not we should just copy over the existing definition
         if(isSlotRepresentation(stack))
@@ -433,25 +464,7 @@ public class ChestUIEditor extends ChestUIHolder {
 
                 try {
 
-
-                    YamlConfiguration slotYaml = new YamlConfiguration();
-
-                    slotYaml.loadFromString(
-                            meta.getPersistentDataContainer().get(
-                                    slotRepresentation,
-                                    PersistentDataType.STRING
-                            )
-                    );
-                    NamespacedKey typeKey = NamespacedKey.fromString(meta.getPersistentDataContainer().get(
-                            slotTypeKey,
-                            PersistentDataType.STRING
-                    ));
-
-                    BaseSlot readSlot = SlotManager.getSlotClass(typeKey)
-                            .getConstructor(ConfigurationSection.class).newInstance(slotYaml);
-
-                    //update the stack size since that's the only things that would reasonably change
-                    readSlot.getContent().setAmount(stack.getAmount());
+                    BaseSlot readSlot = readSlotRepresentation(stack);
 
                     definitions.put(slotKey, convertToSlotRepresentation(readSlot, slotKey));
 
@@ -483,7 +496,7 @@ public class ChestUIEditor extends ChestUIHolder {
 
                 BaseSlot defaultSlot = baseMenu.getDefaultSlot();
 
-                defaultSlot.setContent(cloneWithoutPdc(stack));
+                defaultSlot.setDefinedContent(cloneWithoutPdc(stack));
 
                 slotRepresentations.put(key, defaultSlot);
 
@@ -505,7 +518,7 @@ public class ChestUIEditor extends ChestUIHolder {
     public BaseSlot convertToSlotRepresentation(BaseSlot baseSlot, char key)
     {
 
-        ItemStack original = baseSlot.getContent();
+        ItemStack original = baseSlot.getDefinedContent();
 
         //get a visual copy using the material and stack size
 
@@ -631,7 +644,7 @@ public class ChestUIEditor extends ChestUIHolder {
     {
         for (var slot : definitions.entrySet())
         {
-            if(slot.getValue().getContent().equals(stack))
+            if(slot.getValue().getDefinedContent().equals(stack))
             {
                 return slot.getKey();
             }
@@ -651,6 +664,43 @@ public class ChestUIEditor extends ChestUIHolder {
 
         PersistentDataContainerView pdc = stack.getPersistentDataContainer();
         return (pdc.has(slotRepresentation) && pdc.has(slotCharacterKey));
+    }
+
+    /**
+     * @param rep ItemStack to read from
+     * @return The read slot from the item stack
+     */
+    public static BaseSlot readSlotRepresentation(ItemStack rep) throws InvalidConfigurationException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+
+        if(!isSlotRepresentation(rep))
+        {
+            return null;
+        }
+
+        //this is a rep
+        ItemMeta meta = rep.getItemMeta();
+
+        YamlConfiguration slotYaml = new YamlConfiguration();
+
+        slotYaml.loadFromString(
+                meta.getPersistentDataContainer().get(
+                        slotRepresentation,
+                        PersistentDataType.STRING
+                )
+        );
+        NamespacedKey typeKey = NamespacedKey.fromString(meta.getPersistentDataContainer().get(
+                slotTypeKey,
+                PersistentDataType.STRING
+        ));
+
+        BaseSlot readSlot = SlotManager.getSlotClass(typeKey)
+                .getConstructor(ConfigurationSection.class).newInstance(slotYaml);
+
+        //update the stack size since that's the only things that would reasonably change
+        readSlot.getDefinedContent().setAmount(rep.getAmount());
+
+        return readSlot;
+
     }
 
     /**

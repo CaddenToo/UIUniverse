@@ -111,13 +111,13 @@ public abstract class ChestUIHolder extends UniverseInventoryHolder {
             for (k = 0; k < line.length(); k++)
             {
                 //we are within what was defined for this line, so get the defined slot's content
-                inv.setItem(k + offset, definitions.getOrDefault(line.charAt(k), getDefaultSlot()).getContent());
+                inv.setItem(k + offset, definitions.getOrDefault(line.charAt(k), getDefaultSlot()).getDefinedContent());
             }
 
             //we are over what was defined for this line, so the rest gets filled with default slots
             for (; k < 9; k++)
             {
-                inv.setItem(k + offset, definitions.get(' ').getContent());
+                inv.setItem(k + offset, definitions.get(' ').getDefinedContent());
             }
         }
 
@@ -177,7 +177,7 @@ public abstract class ChestUIHolder extends UniverseInventoryHolder {
     {
         for (var entry : definitions.entrySet())
         {
-            if(entry.getValue().getContent().equals(comparator))
+            if(entry.getValue().getDefinedContent().equals(comparator))
             {
                 return entry.getKey();
             }
