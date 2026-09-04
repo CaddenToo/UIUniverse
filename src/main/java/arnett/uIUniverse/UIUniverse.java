@@ -52,6 +52,7 @@ public final class UIUniverse extends JavaPlugin {
                         new ListMenus())
                 )
         )).registerAsRoot(this);
+
     }
 
     @Override

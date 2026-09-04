@@ -23,7 +23,7 @@ public class RegenMenu extends Cattamand{
 
         boolean preloaded = MenuManager.preloadedMenuInventories.containsKey(key);
 
-        MenuManager.registerMenu(menuClass, preloaded, true);
+        MenuManager.registerMenu(menuClass, preloaded);
 
         return 1;
     }

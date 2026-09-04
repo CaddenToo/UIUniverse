@@ -41,10 +41,7 @@ public class ListMenus extends Cattamand {
     @Override
     public List<? extends Cattarameter> getArguments() {
         return List.of(
-                Cattarameter.of("test",
-                        StringArgumentType.string(),
-                        (Cattarameter.GenericSuggestions) (suggestions)
-                                -> MenuManager.registeredMenuClasses.keySet().stream().map(NamespacedKey::asString).toList())
+
         );
     }
 

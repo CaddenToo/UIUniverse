@@ -34,7 +34,7 @@ import java.util.Map;
 public class ChestUIEditor extends ChestUIHolder {
 
     /**
-     * Used to save the yaml of the origional item slot to an Itemstack representation
+     * Used to save the yaml of the original item slot to an Item stack representation
      */
     public static NamespacedKey slotRepresentation = new NamespacedKey(UIUniverse.singleton, "slotrep");
 
@@ -115,8 +115,6 @@ public class ChestUIEditor extends ChestUIHolder {
                 }
         };
     }
-
-
 
     @Override
     public BaseSlot getDefaultSlot() {

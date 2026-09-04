@@ -10,14 +10,18 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public abstract class UniverseInventoryHolder implements InventoryHolder {
 
-    public UniverseInventoryHolder(String[] layout, HashMap<Character, BaseSlot> definitions, BaseSlot defaultSlot)
+    public MenuKey menuKey = null;
+
+    public UniverseInventoryHolder(String[] layout, HashMap<Character, BaseSlot> definitions, BaseSlot defaultSlot, UUID instanceId)
     {
         this.layout = layout;
         this.definitions = definitions;
         definitions.put(' ', defaultSlot);
+        menuKey = new MenuKey(getIdentifier(), instanceId);
     }
 
     public UniverseInventoryHolder(YamlConfiguration yaml) {
@@ -29,6 +33,16 @@ public abstract class UniverseInventoryHolder implements InventoryHolder {
         this.layout = getDefaultLayout();
         this.definitions = new HashMap<>(getDefaultDefinitions());
         definitions.put(' ', getDefaultSlot());
+    }
+
+
+    public MenuKey getMenuKey() {
+        if(menuKey == null)
+        {
+            return new MenuKey(getIdentifier(), null);
+        }
+
+        return menuKey;
     }
 
 

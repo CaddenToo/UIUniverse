@@ -1,5 +1,6 @@
 package arnett.uIUniverse.commands;
 
+import arnett.uIUniverse.ui.inventory.MenuKey;
 import arnett.uIUniverse.ui.inventory.MenuManager;
 import cd.arnett.caddamands.cattamands.arguments.ArgumentHelper;
 import cd.arnett.caddamands.cattamands.arguments.Cattarameter;
@@ -20,7 +21,7 @@ public class OpenMenu extends Cattamand {
 
         NamespacedKey key = commandContext.getArgument("menu", NamespacedKey.class);
 
-        MenuManager.openMenu(ArgumentHelper.getPlayerSender(commandContext), key);
+        MenuManager.openMenu(ArgumentHelper.getPlayerSender(commandContext), new MenuKey(key, null));
 
         return 1;
     }
