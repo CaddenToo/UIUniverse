@@ -1,5 +1,6 @@
 package arnett.uIUniverse.commands;
 
+import arnett.uIUniverse.ui.inventory.MenuEditor;
 import arnett.uIUniverse.ui.inventory.MenuManager;
 import cd.arnett.caddamands.cattamands.arguments.ArgumentHelper;
 import cd.arnett.caddamands.cattamands.arguments.Cattarameter;
@@ -21,7 +22,7 @@ public class EditMenu extends Cattamand {
 
         Player sender = ArgumentHelper.getPlayerSender(commandContext);
 
-        MenuManager.openEditor(sender, key);
+        MenuEditor.openEditor(sender, key);
 
         return 1;
     }

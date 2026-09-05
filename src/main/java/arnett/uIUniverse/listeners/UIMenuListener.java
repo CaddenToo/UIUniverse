@@ -1,10 +1,12 @@
 package arnett.uIUniverse.listeners;
 
+import arnett.uIUniverse.ui.inventory.MenuManager;
 import arnett.uIUniverse.ui.inventory.UniverseInventoryHolder;
 import arnett.uIUniverse.ui.inventory.chestInvetory.editor.ChestUIEditor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 
 public class UIMenuListener implements Listener {
@@ -12,9 +14,16 @@ public class UIMenuListener implements Listener {
     @EventHandler
     public void onMenuClose(InventoryCloseEvent e)
     {
-        if(e.getInventory().getHolder() instanceof UniverseInventoryHolder holder)
-        {
+        if(e.getInventory().getHolder() instanceof UniverseInventoryHolder holder) {
             holder.onMenuClose(e);
+        }
+    }
+
+    @EventHandler
+    public void onMenuClose(InventoryOpenEvent e)
+    {
+        if(e.getInventory().getHolder() instanceof UniverseInventoryHolder holder) {
+            holder.onMenuOpen(e);
         }
     }
 

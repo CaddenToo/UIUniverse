@@ -4,25 +4,22 @@ import arnett.uIUniverse.ui.inventory.slotTypes.BaseSlot;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public abstract class UniverseInventoryHolder implements InventoryHolder {
 
-    public MenuKey menuKey = null;
 
-    public UniverseInventoryHolder(String[] layout, HashMap<Character, BaseSlot> definitions, BaseSlot defaultSlot, UUID instanceId)
-    {
-        this.layout = layout;
-        this.definitions = definitions;
-        definitions.put(' ', defaultSlot);
-        menuKey = new MenuKey(getIdentifier(), instanceId);
-    }
+
+
+    private MenuKey menuKey = null;
 
     public UniverseInventoryHolder(YamlConfiguration yaml) {
 
@@ -35,6 +32,10 @@ public abstract class UniverseInventoryHolder implements InventoryHolder {
         definitions.put(' ', getDefaultSlot());
     }
 
+
+    public void setMenuKey(UUID instanceId) {
+        menuKey = new MenuKey(getIdentifier(), instanceId);
+    }
 
     public MenuKey getMenuKey() {
         if(menuKey == null)
@@ -98,8 +99,22 @@ public abstract class UniverseInventoryHolder implements InventoryHolder {
     /**
      * Called when a menu with this ID is closed
      */
-    public void onMenuClose(InventoryCloseEvent e) {}
+    @OverridingMethodsMustInvokeSuper
+    public void onMenuClose(InventoryCloseEvent e) {
+        if (getInventory().getViewers().isEmpty())
+        {
+            MenuManager.activeInventories.remove(getMenuKey());
+        }
+    }
 
+    /**
+     * Called when a menu with this ID is opened
+     */
+    @OverridingMethodsMustInvokeSuper
+    public void onMenuOpen(InventoryOpenEvent e) {
+        //save to active inventories
+        MenuManager.activeInventories.put(getMenuKey(), this);
+    }
 
     /**
      * Converts the default layout to Yaml data so it can be stored
