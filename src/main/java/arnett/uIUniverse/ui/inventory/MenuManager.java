@@ -289,10 +289,17 @@ public class MenuManager {
         return player.openInventory(holder.getInventory());
     }
 
-    public static UniverseInventoryHolder createMenuInstance(Class<? extends UniverseInventoryHolder> clazz) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+    public static UniverseInventoryHolder createMenuInstance(Class<? extends UniverseInventoryHolder> clazz) {
         //instantiate a class and get the identifier
-        UniverseInventoryHolder holder = clazz.getConstructor(YamlConfiguration.class).newInstance(new YamlConfiguration());
-        return getMenuInventoryHolder(new MenuKey(holder.getIdentifier(), UUID.randomUUID()));
+        try {
+            UniverseInventoryHolder holder = clazz.getConstructor(YamlConfiguration.class).newInstance(new YamlConfiguration());
+            return getMenuInventoryHolder(new MenuKey(holder.getIdentifier(), UUID.randomUUID()));
+        }
+        catch (Exception e)
+        {
+            UIUniverse.logger.warning("Unable to create menu instance, ensure Yaml constructor is present");
+            return null;
+        }
     }
 
     /**
