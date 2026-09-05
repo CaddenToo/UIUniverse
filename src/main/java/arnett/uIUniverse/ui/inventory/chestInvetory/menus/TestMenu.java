@@ -10,6 +10,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.List;
 import java.util.Map;
 
 public class TestMenu extends ChestUIHolder {
@@ -24,12 +25,12 @@ public class TestMenu extends ChestUIHolder {
     }
 
     @Override
-    public String[] getDefaultLayout() {
-        return new String[]{
+    public List<String> getDefaultLayout() {
+        return List.of(
                 "         ",
                 " 1  2  1 ",
                 "         "
-        };
+        );
     }
 
     @Override

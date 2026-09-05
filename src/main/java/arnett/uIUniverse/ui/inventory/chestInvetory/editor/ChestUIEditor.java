@@ -29,6 +29,7 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 public class ChestUIEditor extends ChestUIHolder {
@@ -124,8 +125,8 @@ public class ChestUIEditor extends ChestUIHolder {
 
 
     @Override
-    public String[] getDefaultLayout() {
-        return new String[0];
+    public List<String> getDefaultLayout() {
+        return List.of();
     }
 
 

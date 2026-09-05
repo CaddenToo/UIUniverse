@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -27,7 +28,7 @@ public abstract class UniverseInventoryHolder implements InventoryHolder {
 
     public UniverseInventoryHolder()
     {
-        this.layout = getDefaultLayout();
+        this.layout = getValidatedDefaultLayout().toArray(new String[0]);
         this.definitions = new HashMap<>(getDefaultDefinitions());
         definitions.put(' ', getDefaultSlot());
     }
@@ -48,12 +49,12 @@ public abstract class UniverseInventoryHolder implements InventoryHolder {
 
 
     public String[] layout = {
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
+            "         ",
+            "         ",
+            "         ",
+            "         ",
+            "         ",
+            "         "
     };
 
     public HashMap<Character, BaseSlot> definitions = new HashMap<>();
@@ -75,7 +76,13 @@ public abstract class UniverseInventoryHolder implements InventoryHolder {
      * uses getDefaultDefinitions() for which character represents which slot.<br>
      * spaces " " are default slots.
      */
-    public abstract String[] getDefaultLayout();
+    public abstract List<String> getDefaultLayout();
+
+    /**
+     * Fixes any layout given so that every slot is defined even for when layouts are sketchy
+     * @return Fixed default layout
+     */
+    public abstract List<String> getValidatedDefaultLayout();
 
     /**
      * @return Defines the possible item slots available to pick from for the menu.

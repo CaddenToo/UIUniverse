@@ -4,3 +4,5 @@ main: arnett.uIUniverse.UIUniverse
 api-version: '1.21'
 authors: [ Arnett, Catten, Cadden ]
 description: Moving environment
+
+load: STARTUP

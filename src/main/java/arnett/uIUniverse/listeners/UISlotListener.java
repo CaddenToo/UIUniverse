@@ -30,9 +30,15 @@ public class UISlotListener implements Listener {
         int rawClickedSlot = e.getRawSlot();
 
         //only if we clicked in the top half of the inventory
-        if(rawClickedSlot >= 0 && rawClickedSlot < topInventory.getSize())
-        {
+        if(rawClickedSlot >= 0 && rawClickedSlot < topInventory.getSize()) {
             BaseSlot clickedSlot = holder.getBaseSlot(e.getSlot());
+
+            if (clickedSlot == null)
+            {
+                e.setCancelled(true);
+                return;
+            }
+
             clickedSlot.onSelect(player, topInventory, rawClickedSlot);
 
             //stop if this slot isn't movable

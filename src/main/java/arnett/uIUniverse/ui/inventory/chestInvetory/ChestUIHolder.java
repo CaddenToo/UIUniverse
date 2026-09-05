@@ -13,6 +13,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public abstract class ChestUIHolder extends UniverseInventoryHolder {
 
     Inventory builtInventory;
@@ -172,6 +174,40 @@ public abstract class ChestUIHolder extends UniverseInventoryHolder {
         return yaml;
     }
 
+    @Override
+    public List<String> getValidatedDefaultLayout() {
+        List<String> list = getDefaultLayout();
+
+        for (int i = 0; i < list.size(); i++) {
+
+            String current = list.get(i);
+
+            //string is too long
+            if(current.length() > 9)
+            {
+                list.set(i, current.substring(0, 9));
+
+                //shift the end of this to the next
+                if(list.size() > i + 1)
+                {
+                    list.set(i + 1, list.get(i + 1) + current.substring(9));
+                }
+                else
+                {
+                    list.add(current.substring(9));
+                }
+            }
+
+            //string is not long enough
+            else if(current.length() < 9)
+            {
+                list.set(i, String.format("%-10s", current));
+            }
+
+        }
+
+        return list;
+    }
 
     public char getItemKey(ItemStack comparator)
     {
