@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -288,9 +289,10 @@ public class MenuManager {
         return player.openInventory(holder.getInventory());
     }
 
-    public static UniverseInventoryHolder createMenuInstance(NamespacedKey baseTypeIdentifier)
-    {
-        return getMenuInventoryHolder(new MenuKey(baseTypeIdentifier, UUID.randomUUID()));
+    public static UniverseInventoryHolder createMenuInstance(Class<? extends UniverseInventoryHolder> clazz) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
+        //instantiate a class and get the identifier
+        UniverseInventoryHolder holder = clazz.getConstructor(YamlConfiguration.class).newInstance(new YamlConfiguration());
+        return getMenuInventoryHolder(new MenuKey(holder.getIdentifier(), UUID.randomUUID()));
     }
 
     /**
