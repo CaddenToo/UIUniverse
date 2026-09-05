@@ -34,7 +34,7 @@ public class OpenMenu extends Cattamand {
     @Override
     public List<? extends Cattarameter> getArguments() {
         return List.of(
-                Cattarameter.of(
+                new Cattarameter(
                         "menu",
                         ArgumentTypes.namespacedKey(),
                         MenuManager.registeredMenuClasses.keySet().stream().map(NamespacedKey::toString).toList()

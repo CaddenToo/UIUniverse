@@ -48,11 +48,11 @@ public class PromptTest extends Cattamand {
     @Override
     public List<? extends Cattarameter> getArguments() {
         return List.of(
-            Cattarameter.of(
+            new Cattarameter(
                     "players",
                     ArgumentTypes.players()
             ),
-            Cattarameter.of(
+            new Cattarameter(
                     "type",
                     StringArgumentType.string(),
                     List.of("die", "server", "branch")

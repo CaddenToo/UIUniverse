@@ -20,7 +20,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
-    implementation("com.github.Kangawooo-Events:Caddamands:ca561e3b99")}
+    implementation("com.github.Kangawooo-Events:Caddamands:-SNAPSHOT")}
 
 tasks {
     runServer {
