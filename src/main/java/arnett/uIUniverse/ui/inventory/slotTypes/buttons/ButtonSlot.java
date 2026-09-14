@@ -1,6 +1,7 @@
 package arnett.uIUniverse.ui.inventory.slotTypes.buttons;
 
 import arnett.uIUniverse.ui.dialog.types.value.parameters.PromptInput;
+import arnett.uIUniverse.ui.inventory.slotTypes.BaseSlot;
 import arnett.uIUniverse.ui.inventory.slotTypes.DisplaySlot;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -20,28 +21,20 @@ import java.util.List;
 public abstract class ButtonSlot extends DisplaySlot {
 
     protected PromptInput<?>[] parameters;
+    public abstract PromptInput<?>[] getDefaultParameters();
 
-    public ButtonSlot(ItemStack displayItem)
-    {
-        super(displayItem);
-        parameters = getDefaultParameters();
-    }
 
-    public ButtonSlot(Material contentMat, int amount)
-    {
-        super(contentMat, amount);
-        parameters = getDefaultParameters();
-    }
+    //region Initialization
 
-    public ButtonSlot()
-    {
-        super();
-    }
+    /*=================================================================================================
+                        -  Initialization  -
+    =================================================================================================*/
 
-    protected ButtonSlot(ConfigurationSection yaml)
-    {
+    @Override
+    public BaseSlot readFromYaml(YamlConfiguration yaml) {
+
         //read the content
-        super(yaml);
+        super.readFromYaml(yaml);
 
         //get the default structure of parameters (specifically the types and names)
         parameters = getDefaultParameters();
@@ -60,23 +53,45 @@ public abstract class ButtonSlot extends DisplaySlot {
             //will try to set and if there is an error will do nothing
             parameter.trySetValue(value);
         }
+
+        return this;
     }
 
 
+    //endregion
+
+
+    //region Events
+
+    /*=================================================================================================
+                        -  Events  -
+    =================================================================================================*/
+
+    /**
+     * Execution to be called upon a click. <br>
+     * Disclaimer - to read/set this slot's content you have to get it from the inventory
+     * @param player Player causing the execution
+     * @param inventory Inventory belonging to the clicked slot
+     * @param slot Slot number clicked
+     * @param parameters Parameters of the button
+     */
     public abstract void execute(Player player, Inventory inventory, int slot, PromptInput<?>... parameters);
-
-    public abstract PromptInput<?>[] getDefaultParameters();
-
 
     @Override
     public void onSelect(Player player, Inventory inventory, int slot) {
-
-        //todo read parameters from yaml file or pdc of item
-
         execute(player, inventory, slot, parameters);
     }
 
 
+
+    //endregion
+
+
+    //region Yaml
+
+    /*=================================================================================================
+                        -  Yaml  -
+    =================================================================================================*/
 
     @Override
     public YamlConfiguration writeToYaml() {
@@ -93,11 +108,21 @@ public abstract class ButtonSlot extends DisplaySlot {
         return yaml;
     }
 
-    @Override
-    public abstract NamespacedKey getIdentifier();
+    //endregion
 
+
+    //region Editor
+
+    /*=================================================================================================
+                        -  Editor  -
+    =================================================================================================*/
+
+
+    /**
+     * @return Parameter lore seperated into a list of text components
+     */
     @Override
-    public List<TextComponent> getDisplayLore() {
+    public List<TextComponent> getEditorLore() {
 
         ArrayList<TextComponent> out = new ArrayList<>();
 
@@ -111,16 +136,19 @@ public abstract class ButtonSlot extends DisplaySlot {
             }
 
             out.add(
-                Component.text(
-                    parameters[i].getName() + " - " + value,
-                    NamedTextColor.DARK_PURPLE,
-                    TextDecoration.ITALIC
-                )
+                    Component.text(
+                            parameters[i].getName() + " - " + value,
+                            NamedTextColor.DARK_PURPLE,
+                            TextDecoration.ITALIC
+                    )
             );
         }
 
         return out;
 
     }
+
+
+    //endregion
 }
 

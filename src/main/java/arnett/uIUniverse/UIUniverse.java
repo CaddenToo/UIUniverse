@@ -3,6 +3,7 @@ package arnett.uIUniverse;
 import arnett.uIUniverse.commands.EditMenu;
 import arnett.uIUniverse.commands.PromptTest;
 import arnett.uIUniverse.commands.RegenMenu;
+import arnett.uIUniverse.commands.list.ListActive;
 import arnett.uIUniverse.commands.list.ListMenus;
 import arnett.uIUniverse.commands.list.ListSlots;
 import arnett.uIUniverse.commands.OpenMenu;
@@ -49,7 +50,9 @@ public final class UIUniverse extends JavaPlugin {
                 new PromptTest(),
                 new LiteralCattamand("list", List.of(
                         new ListSlots(),
-                        new ListMenus())
+                        new ListMenus(),
+                        new ListActive()
+                        )
                 )
         )).registerAsRoot(this);
 

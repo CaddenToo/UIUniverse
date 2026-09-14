@@ -13,17 +13,6 @@ import org.bukkit.util.Vector;
 
 public class TestButtonSlot extends ButtonSlot {
 
-    public TestButtonSlot(ItemStack displayItem) {
-        super(displayItem);
-    }
-
-    public TestButtonSlot() {
-    }
-
-    public TestButtonSlot(ConfigurationSection yaml) {
-        super(yaml);
-    }
-
     @Override
     public void execute(Player player, Inventory inventory, int slot, PromptInput<?>... parameters) {
         player.teleport(player.getLocation().add(new Vector(0f, (float)parameters[0].getValue(), 0f)));

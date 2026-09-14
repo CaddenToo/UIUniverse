@@ -9,25 +9,6 @@ import org.bukkit.inventory.ItemStack;
 
 public class StorageSlot extends BaseSlot {
 
-    public StorageSlot()
-    {
-        super();
-    }
-
-    public StorageSlot(ItemStack content)
-    {
-        super(content);
-    }
-
-    public StorageSlot(Material contentMat, int amount)
-    {
-        super(contentMat, amount);
-    }
-
-    public StorageSlot(ConfigurationSection yaml) {
-        super(yaml);
-    }
-
     @Override
     public final boolean isMovable() {
         return true;
@@ -39,7 +20,7 @@ public class StorageSlot extends BaseSlot {
     }
 
     @Override
-    public DyeColor getDisplayColor()
+    public DyeColor getEditorColor()
     {
         return DyeColor.GRAY;
     }

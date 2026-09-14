@@ -2,11 +2,13 @@ package arnett.uIUniverse.listeners;
 
 import arnett.uIUniverse.ui.inventory.slotTypes.BaseSlot;
 import arnett.uIUniverse.ui.inventory.UniverseInventoryHolder;
+import io.papermc.paper.event.player.PlayerInventorySlotChangeEvent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
@@ -15,6 +17,9 @@ public class UISlotListener implements Listener {
     @EventHandler
     public void onClick(InventoryClickEvent e)
     {
+        if(e.isCancelled())
+            return;
+
         //only continue for custom inventories
         if (!(e.getInventory().getHolder() instanceof UniverseInventoryHolder holder))
         {
@@ -48,44 +53,46 @@ public class UISlotListener implements Listener {
                 return;
             }
         }
-        //clicking inside player inventory not menu
+
+        //clicking inside player inventory, not menu
         else
         {
-            //check for shift click into to menu
-            if(e.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY)
+            switch (e.getAction())
             {
-                //stop the event
-                e.setCancelled(true);
-
-                holder.deposit(topInventory, e.getCurrentItem());
-            }
-            //check for move all of type
-            else if(e.getAction() == InventoryAction.COLLECT_TO_CURSOR)
-            {
-                if(e.getCurrentItem() == null || e.getCurrentItem().isEmpty())
-                {
-                    return;
+                //check for shift click into to menu
+                case MOVE_TO_OTHER_INVENTORY -> {
+                    e.setCancelled(true);
+                    holder.deposit(e.getCurrentItem());
                 }
 
-                //stop the event
-                e.setCancelled(true);
-
-                //make a copy so we don't lose it when moved
-                ItemStack currentItem = e.getCurrentItem().clone();
-
-                //move all of similar type
-                for(ItemStack stack : bottomInventory.getContents())
-                {
-                    if(stack == null || stack.isEmpty())
+                //check for double click pickup
+                case COLLECT_TO_CURSOR -> {
+                    if(e.getCurrentItem() == null || e.getCurrentItem().isEmpty())
                     {
-                        continue;
+                        return;
                     }
-                    else if(stack.isSimilar(currentItem))
+
+                    //stop the event
+                    e.setCancelled(true);
+
+                    //make a copy so we don't lose it when moved
+                    ItemStack currentItem = e.getCurrentItem().clone();
+
+                    //move all of similar type
+                    for(ItemStack stack : bottomInventory.getContents())
                     {
-                        holder.deposit(topInventory, stack);
+                        if(stack == null || stack.isEmpty())
+                        {
+                            continue;
+                        }
+                        else if(stack.isSimilar(currentItem))
+                        {
+                            holder.deposit(stack);
+                        }
                     }
                 }
             }
         }
     }
+
 }

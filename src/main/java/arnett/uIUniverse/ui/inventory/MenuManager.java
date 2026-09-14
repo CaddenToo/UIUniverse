@@ -74,7 +74,7 @@ public class MenuManager {
         UniverseInventoryHolder menu;
         try
         {
-            menu = menuClass.getConstructor(YamlConfiguration.class).newInstance(new YamlConfiguration());
+            menu = menuClass.getConstructor().newInstance();
         }
         catch (Exception e)
         {
@@ -292,7 +292,7 @@ public class MenuManager {
     public static UniverseInventoryHolder createMenuInstance(Class<? extends UniverseInventoryHolder> clazz) {
         //instantiate a class and get the identifier
         try {
-            UniverseInventoryHolder holder = clazz.getConstructor(YamlConfiguration.class).newInstance(new YamlConfiguration());
+            UniverseInventoryHolder holder = clazz.getConstructor().newInstance();
             return getMenuInventoryHolder(new MenuKey(holder.getIdentifier(), UUID.randomUUID()));
         }
         catch (Exception e)
@@ -321,7 +321,7 @@ public class MenuManager {
 
             YamlConfiguration yaml = YamlConfiguration.loadConfiguration(menuFile);
             Class<? extends UniverseInventoryHolder> menuClass = registeredMenuClasses.get(menuKey.namespace());
-            UniverseInventoryHolder holder = menuClass.getConstructor(YamlConfiguration.class).newInstance(yaml);
+            UniverseInventoryHolder holder = menuClass.getConstructor().newInstance().readFromYaml(yaml);
 
             //set the instance id
             holder.setMenuKey(menuKey.id());

@@ -20,7 +20,7 @@ public class UIMenuListener implements Listener {
     }
 
     @EventHandler
-    public void onMenuClose(InventoryOpenEvent e)
+    public void onMenuOpen(InventoryOpenEvent e)
     {
         if(e.getInventory().getHolder() instanceof UniverseInventoryHolder holder) {
             holder.onMenuOpen(e);

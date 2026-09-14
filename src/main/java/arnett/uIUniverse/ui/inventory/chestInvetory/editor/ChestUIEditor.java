@@ -20,6 +20,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -68,12 +69,10 @@ public class ChestUIEditor extends ChestUIHolder {
      */
     public ChestUIEditor(ChestUIHolder menu) {
 
-        //call a constructor because I guess this is required?
-        super(menu);
-
         /*
-        anyway on to the actual logic, basically the idea here is that
-        we are copying the menu provided but converting the slots to all storage so it's movable
+        the idea here is that we are copying the menu provided but converting the slots to all storage so it's movable
+        and all the items to representations so that we are not moving the actual items but the slots that represent
+        them
          */
 
         //save the base
@@ -104,13 +103,13 @@ public class ChestUIEditor extends ChestUIHolder {
     {
         return new BaseSlot[][]{
                 {
-                        new DisplaySlot(Material.GLOW_ITEM_FRAME, 1),
-                        new DisplaySlot(Material.DIAMOND, 1),
+                        new DisplaySlot().setInitialContent(Material.GLOW_ITEM_FRAME, 1),
+                        new DisplaySlot().setInitialContent(Material.DIAMOND, 1),
                         null,
                         null,
-                        new DisplaySlot(Material.DIRT, 1),
-                        new DisplaySlot(Material.AXOLOTL_SPAWN_EGG, 1),
-                        new DisplaySlot(Material.LAVA_BUCKET, 1),
+                        new DisplaySlot().setInitialContent(Material.DIRT, 1),
+                        new DisplaySlot().setInitialContent(Material.AXOLOTL_SPAWN_EGG, 1),
+                        new DisplaySlot().setInitialContent(Material.LAVA_BUCKET, 1),
                         null,
                         new SaveEditButton(Material.GREEN_BANNER, 1),
                 }
@@ -119,7 +118,7 @@ public class ChestUIEditor extends ChestUIHolder {
 
     @Override
     public BaseSlot getDefaultSlot() {
-        return new StorageSlot(ItemStack.empty());
+        return new StorageSlot().setInitialContent(ItemStack.empty());
     }
 
 
@@ -175,13 +174,13 @@ public class ChestUIEditor extends ChestUIHolder {
             for (k = 0; k < line.length(); k++)
             {
                 //we are within what was defined for this line, so get the defined slot's content
-                inv.setItem(k + offset, definitions.getOrDefault(line.charAt(k), getDefaultSlot()).getContent());
+                inv.setItem(k + offset, definitions.getOrDefault(line.charAt(k), getDefaultSlot()).getInitialContent());
             }
 
             //we are over what was defined for this line, so the rest gets filled with default slots
             for (; k < 9; k++)
             {
-                inv.setItem(k + offset, definitions.get(' ').getContent());
+                inv.setItem(k + offset, definitions.get(' ').getInitialContent());
             }
         }
 
@@ -194,7 +193,7 @@ public class ChestUIEditor extends ChestUIHolder {
             for (k = 0; k < line.length; k++)
             {
                 //we are within what was defined for this line, so get the defined slot's content
-                inv.setItem(k + offset, line[k] == null ? ItemStack.empty() : line[k].getContent());
+                inv.setItem(k + offset, line[k] == null ? ItemStack.empty() : line[k].getInitialContent());
             }
 
             //we are over what was defined for this line, so the rest gets filled with air
@@ -230,7 +229,7 @@ public class ChestUIEditor extends ChestUIHolder {
             }
             else
             {
-                return new DisplaySlot(ItemStack.empty());
+                return new DisplaySlot().setInitialContent(ItemStack.empty());
             }
 
         }
@@ -447,10 +446,10 @@ public class ChestUIEditor extends ChestUIHolder {
                     ));
 
                     BaseSlot readSlot = SlotManager.getSlotClass(typeKey)
-                            .getConstructor(ConfigurationSection.class).newInstance(slotYaml);
+                            .getConstructor().newInstance().readFromYaml(slotYaml);
 
                     //update the stack size since that's the only things that would reasonably change
-                    readSlot.getContent().setAmount(stack.getAmount());
+                    readSlot.getInitialContent().setAmount(stack.getAmount());
 
                     definitions.put(slotKey, convertToSlotRepresentation(readSlot, slotKey));
 
@@ -480,9 +479,7 @@ public class ChestUIEditor extends ChestUIHolder {
                 //it is not defined so define it first before returning it
                 UIUniverse.logger.warning("Passed Item slot does NOT contain the information to be converted to ItemSlot");
 
-                BaseSlot defaultSlot = baseMenu.getDefaultSlot();
-
-                defaultSlot.setContent(cloneWithoutPdc(stack));
+                BaseSlot defaultSlot = baseMenu.getDefaultSlot().clone(cloneWithoutPdc(stack));
 
                 slotRepresentations.put(key, defaultSlot);
 
@@ -504,7 +501,7 @@ public class ChestUIEditor extends ChestUIHolder {
     public BaseSlot convertToSlotRepresentation(BaseSlot baseSlot, char key)
     {
 
-        ItemStack original = baseSlot.getContent();
+        ItemStack original = baseSlot.getInitialContent();
 
         //get a visual copy using the material and stack size
 
@@ -529,7 +526,7 @@ public class ChestUIEditor extends ChestUIHolder {
                 )
         );
 
-        slotMeta.lore(baseSlot.getDisplayLore());
+        slotMeta.lore(baseSlot.getEditorLore());
 
         //clear any editor tags off the base slot content to prevent data overflow
 
@@ -554,7 +551,7 @@ public class ChestUIEditor extends ChestUIHolder {
 
         convertedSlotItem.setItemMeta(slotMeta);
 
-        return new StorageSlot(convertedSlotItem);
+        return new StorageSlot().setInitialContent(convertedSlotItem);
     }
 
     /**
@@ -630,7 +627,7 @@ public class ChestUIEditor extends ChestUIHolder {
     {
         for (var slot : definitions.entrySet())
         {
-            if(slot.getValue().getContent().equals(stack))
+            if(slot.getValue().getInitialContent().equals(stack))
             {
                 return slot.getKey();
             }
@@ -670,5 +667,9 @@ public class ChestUIEditor extends ChestUIHolder {
         }
     }
 
+    // do not sync the editor menu
+    @Override
+    public void onMenuOpen(InventoryOpenEvent e) {
 
+    }
 }

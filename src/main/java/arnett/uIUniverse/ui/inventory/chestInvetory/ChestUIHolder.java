@@ -11,22 +11,24 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ChestUIHolder extends UniverseInventoryHolder {
 
-    Inventory builtInventory;
+    //region Yaml
 
-    protected ChestUIHolder(ChestUIHolder other)
-    {}
+    /*=================================================================================================
+                        -  Yaml  -
+    =================================================================================================*/
 
-    public ChestUIHolder(YamlConfiguration yaml)
+    @Override
+    public UniverseInventoryHolder readFromYaml(YamlConfiguration yaml)
     {
         if(yaml == null || yaml.getValues(false).isEmpty())
         {
-            return;
+            return this;
         }
 
         int lineOn = 1;
@@ -63,7 +65,7 @@ public abstract class ChestUIHolder extends UniverseInventoryHolder {
 
             try
             {
-                BaseSlot instantiatedSlot = slotClass.getConstructor(ConfigurationSection.class).newInstance(slotSection);
+                BaseSlot instantiatedSlot = slotClass.getConstructor().newInstance().readFromYaml(yaml);
                 definitions.put(key.charAt(0), instantiatedSlot);
             }
             catch (Exception e)
@@ -72,59 +74,8 @@ public abstract class ChestUIHolder extends UniverseInventoryHolder {
                 e.printStackTrace();
             }
         });
-    }
 
-    /**
-     * Gets the slot data for a specific slot
-     * @param slotNumber Slot number to check
-     * @return The slot data
-     * @throws IndexOutOfBoundsException Thrown if index is out of bounds
-     */
-    @Override
-    public BaseSlot getBaseSlot(int slotNumber) throws IndexOutOfBoundsException {
-        return definitions.get(layout[slotNumber / 9].charAt(slotNumber % 9));
-    }
-
-    @Override
-    public @NotNull Inventory getInventory() {
-        if(builtInventory == null)
-        {
-            UIUniverse.logger.info("Building inventory for " + getIdentifier().toString());
-            builtInventory = buildInventory();
-            return builtInventory;
-        }
-        else {
-            return builtInventory;
-        }
-    }
-
-    @Override
-    public Inventory buildInventory() {
-        //create the inventory
-        Inventory inv = Bukkit.createInventory(this, layout.length * 9, MiniMessage.miniMessage().deserialize(""));
-
-        //set content in inventory
-        for (int i = 0; i < layout.length; i++)
-        {
-            int k;
-            int offset = 9 * i;
-            String line = layout[i];
-
-            for (k = 0; k < line.length(); k++)
-            {
-                //we are within what was defined for this line, so get the defined slot's content
-                inv.setItem(k + offset, definitions.getOrDefault(line.charAt(k), getDefaultSlot()).getContent());
-            }
-
-            //we are over what was defined for this line, so the rest gets filled with default slots
-            for (; k < 9; k++)
-            {
-                inv.setItem(k + offset, definitions.get(' ').getContent());
-            }
-        }
-
-        //return the now filled inventory
-        return inv;
+        return this;
     }
 
     /**
@@ -174,9 +125,71 @@ public abstract class ChestUIHolder extends UniverseInventoryHolder {
         return yaml;
     }
 
+
+    //endregion
+
+
+    //region Inventory
+
+    /*=================================================================================================
+                        -  Inventory  -
+    =================================================================================================*/
+
+    /**
+     * Gets the slot data for a specific slot
+     * @param slotNumber Slot number to check
+     * @return The slot data
+     * @throws IndexOutOfBoundsException Thrown if index is out of bounds
+     */
+    @Override
+    public BaseSlot getBaseSlot(int slotNumber) throws IndexOutOfBoundsException {
+        return definitions.get(layout[slotNumber / 9].charAt(slotNumber % 9));
+    }
+
+
+    @Override
+    public Inventory buildInventory() {
+        //create the inventory
+        Inventory inv = Bukkit.createInventory(this, layout.length * 9, MiniMessage.miniMessage().deserialize(""));
+
+        //set content in inventory
+        for (int i = 0; i < layout.length; i++)
+        {
+            int k;
+            int offset = 9 * i;
+            String line = layout[i];
+
+            for (k = 0; k < line.length(); k++)
+            {
+                //we are within what was defined for this line, so get the defined slot's content
+                inv.setItem(k + offset, definitions.getOrDefault(line.charAt(k), getDefaultSlot()).getInitialContent());
+            }
+
+            //we are over what was defined for this line, so the rest gets filled with default slots
+            for (; k < 9; k++)
+            {
+                inv.setItem(k + offset, definitions.get(' ').getInitialContent());
+            }
+        }
+
+        //return the now filled inventory
+        return inv;
+    }
+
+
+    //endregion
+
+
+    //region Layout
+
+    /*=================================================================================================
+                        -  Layout  -
+    =================================================================================================*/
+
+
     @Override
     public List<String> getValidatedDefaultLayout() {
-        List<String> list = getDefaultLayout();
+        ArrayList<String> list = new ArrayList<>(getDefaultLayout());
 
         for (int i = 0; i < list.size(); i++) {
 
@@ -209,11 +222,12 @@ public abstract class ChestUIHolder extends UniverseInventoryHolder {
         return list;
     }
 
+
     public char getItemKey(ItemStack comparator)
     {
         for (var entry : definitions.entrySet())
         {
-            if(entry.getValue().getContent().equals(comparator))
+            if(entry.getValue().getInitialContent().equals(comparator))
             {
                 return entry.getKey();
             }
@@ -221,4 +235,9 @@ public abstract class ChestUIHolder extends UniverseInventoryHolder {
 
         return getAvailableCharacter();
     }
+
+
+    //endregion
+
+
 }

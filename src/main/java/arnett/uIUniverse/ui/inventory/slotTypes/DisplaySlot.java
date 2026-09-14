@@ -7,33 +7,14 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
 
+import java.lang.reflect.InvocationTargetException;
+
 public class DisplaySlot extends BaseSlot{
-
-    public DisplaySlot()
-    {
-        super();
-    }
-
-    public DisplaySlot(ItemStack displayItem)
-    {
-        super(displayItem);
-    }
-
-    public DisplaySlot(Material contentMat, int amount)
-    {
-        super(contentMat, amount);
-    }
-
-    public DisplaySlot(ConfigurationSection yaml)
-    {
-        super(yaml);
-    }
 
     @Override
     public final boolean isMovable() {
         return false;
     }
-
 
     @Override
     public NamespacedKey getIdentifier() {
@@ -41,7 +22,7 @@ public class DisplaySlot extends BaseSlot{
     }
 
     @Override
-    public DyeColor getDisplayColor()
+    public DyeColor getEditorColor()
     {
         return DyeColor.PURPLE;
     }
