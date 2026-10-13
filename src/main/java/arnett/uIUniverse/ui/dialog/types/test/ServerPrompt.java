@@ -4,6 +4,7 @@ import arnett.uIUniverse.ui.dialog.PromptHelper;
 import arnett.uIUniverse.ui.dialog.types.link.LinkPrompter;
 import io.papermc.paper.dialog.DialogResponseView;
 import io.papermc.paper.registry.data.dialog.ActionButton;
+import io.papermc.paper.registry.data.dialog.body.DialogBody;
 import io.papermc.paper.registry.data.dialog.input.DialogInput;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -51,5 +52,10 @@ public class ServerPrompt extends LinkPrompter {
     @Override
     public List<DialogInput> inputs() {
         return List.of(DialogInput.bool("text", Component.text("ag")).build());
+    }
+
+    @Override
+    public List<DialogBody> body() {
+        return List.of();
     }
 }

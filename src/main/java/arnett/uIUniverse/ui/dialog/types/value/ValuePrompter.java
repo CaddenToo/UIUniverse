@@ -5,6 +5,7 @@ import arnett.uIUniverse.ui.dialog.types.value.parameters.PromptInput;
 import io.papermc.paper.dialog.DialogResponseView;
 import io.papermc.paper.registry.data.dialog.ActionButton;
 import io.papermc.paper.registry.data.dialog.action.DialogAction;
+import io.papermc.paper.registry.data.dialog.body.DialogBody;
 import io.papermc.paper.registry.data.dialog.input.DialogInput;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.event.ClickCallback;
@@ -62,6 +63,11 @@ public class ValuePrompter extends ConfirmationPrompter {
     @Override
     public List<DialogInput> inputs() {
         return inputs.stream().map(PromptInput::inputFormat).toList();
+    }
+
+    @Override
+    public List<DialogBody> body() {
+        return List.of();
     }
 
     @Override

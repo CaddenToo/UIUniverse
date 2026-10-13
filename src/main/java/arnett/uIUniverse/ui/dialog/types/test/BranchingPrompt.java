@@ -6,6 +6,7 @@ import arnett.uIUniverse.ui.dialog.types.link.LinkPrompter;
 import io.papermc.paper.dialog.Dialog;
 import io.papermc.paper.dialog.DialogResponseView;
 import io.papermc.paper.registry.RegistryKey;
+import io.papermc.paper.registry.data.dialog.body.DialogBody;
 import io.papermc.paper.registry.data.dialog.input.DialogInput;
 import io.papermc.paper.registry.keys.DialogKeys;
 import io.papermc.paper.registry.set.RegistryKeySet;
@@ -61,5 +62,10 @@ public class BranchingPrompt extends BranchPrompter {
     @Override
     public List<DialogInput> inputs() {
         return List.of(DialogInput.bool("text", Component.text("ag")).build());
+    }
+
+    @Override
+    public List<DialogBody> body() {
+        return List.of();
     }
 }

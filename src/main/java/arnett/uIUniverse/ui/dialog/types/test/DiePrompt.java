@@ -4,6 +4,7 @@ import arnett.uIUniverse.ui.dialog.PromptHelper;
 import arnett.uIUniverse.ui.dialog.types.confirmation.ConfirmationPrompter;
 import io.papermc.paper.dialog.DialogResponseView;
 import io.papermc.paper.registry.data.dialog.ActionButton;
+import io.papermc.paper.registry.data.dialog.body.DialogBody;
 import io.papermc.paper.registry.data.dialog.input.DialogInput;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
@@ -79,5 +80,10 @@ public class DiePrompt extends ConfirmationPrompter {
                 DialogInput.bool("Third", MiniMessage.miniMessage().deserialize("<i>Breath your <red>last</red> breath</i>...")).build(),
                 DialogInput.bool("Fourth", MiniMessage.miniMessage().deserialize("<i>Admit cats are <bold>better</bold> than dogs</i>...")).build()
         );
+    }
+
+    @Override
+    public List<DialogBody> body() {
+        return List.of();
     }
 }
