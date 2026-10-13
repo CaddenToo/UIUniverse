@@ -6,6 +6,7 @@ import io.papermc.paper.registry.data.dialog.ActionButton;
 import io.papermc.paper.registry.data.dialog.DialogBase.DialogAfterAction;
 import io.papermc.paper.registry.data.dialog.DialogBase;
 import io.papermc.paper.registry.data.dialog.input.DialogInput;
+import io.papermc.paper.registry.data.dialog.body.DialogBody;
 import io.papermc.paper.registry.data.dialog.type.DialogType;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
@@ -35,6 +36,11 @@ public abstract class Prompter {
      * warning button by minecraft
      */
     public abstract List<DialogInput> inputs();
+
+    /**
+     * @return {@code List<DialogBody>} Body of this Dialog, displayed above inputs
+     */
+    public abstract List<DialogBody> body();
 
     /**
      * @return {@code List<ActionButton>} List of the footer buttons (often just the exit button),
@@ -89,6 +95,8 @@ public abstract class Prompter {
 
         return DialogBase.builder(
                 MiniMessage.miniMessage().deserialize(title())
+        ).body(
+                body()
         ).inputs(
                 inputs()
         ).canCloseWithEscape(
