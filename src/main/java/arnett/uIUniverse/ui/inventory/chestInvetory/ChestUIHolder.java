@@ -1,7 +1,7 @@
 package arnett.uIUniverse.ui.inventory.chestInvetory;
 
 import arnett.uIUniverse.UIUniverse;
-import arnett.uIUniverse.ui.inventory.slotTypes.BaseSlot;
+import arnett.uIUniverse.ui.inventory.slotTypes.SlotType;
 import arnett.uIUniverse.ui.inventory.slotTypes.SlotManager;
 import arnett.uIUniverse.ui.inventory.UniverseInventoryHolder;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -13,6 +13,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public abstract class ChestUIHolder extends UniverseInventoryHolder {
@@ -61,11 +62,11 @@ public abstract class ChestUIHolder extends UniverseInventoryHolder {
 
             String[] identifier = slotSection.getKeys(false).iterator().next().split("-");
 
-            Class<? extends BaseSlot> slotClass = SlotManager.getSlotClass(new NamespacedKey(identifier[0], identifier[1]));
+            Class<? extends SlotType> slotClass = SlotManager.getSlotClass(new NamespacedKey(identifier[0], identifier[1]));
 
             try
             {
-                BaseSlot instantiatedSlot = slotClass.getConstructor().newInstance().readFromYaml(yaml);
+                SlotType instantiatedSlot = slotClass.getConstructor().newInstance().readFromYaml(slotSection);
                 definitions.put(key.charAt(0), instantiatedSlot);
             }
             catch (Exception e)
@@ -142,7 +143,7 @@ public abstract class ChestUIHolder extends UniverseInventoryHolder {
      * @throws IndexOutOfBoundsException Thrown if index is out of bounds
      */
     @Override
-    public BaseSlot getBaseSlot(int slotNumber) throws IndexOutOfBoundsException {
+    protected SlotType getSlotType(int slotNumber) throws IndexOutOfBoundsException {
         return definitions.get(layout[slotNumber / 9].charAt(slotNumber % 9));
     }
 
@@ -152,6 +153,9 @@ public abstract class ChestUIHolder extends UniverseInventoryHolder {
         //create the inventory
         Inventory inv = Bukkit.createInventory(this, layout.length * 9, MiniMessage.miniMessage().deserialize(""));
 
+        //track what number of this slot type we're on
+        HashMap<Character, Integer> layoutCounter = new HashMap<>();
+
         //set content in inventory
         for (int i = 0; i < layout.length; i++)
         {
@@ -159,17 +163,32 @@ public abstract class ChestUIHolder extends UniverseInventoryHolder {
             int offset = 9 * i;
             String line = layout[i];
 
+            //we are within what was defined for this line, so get the defined slot's content
             for (k = 0; k < line.length(); k++)
             {
-                //we are within what was defined for this line, so get the defined slot's content
-                inv.setItem(k + offset, definitions.getOrDefault(line.charAt(k), getDefaultSlot()).getInitialContent());
+                char slotTypeChar = line.charAt(k);
+                int counter = layoutCounter.getOrDefault(slotTypeChar, 0);
+                inv.setItem(
+                        k + offset,
+                        definitions.getOrDefault(
+                                slotTypeChar,
+                                getDefaultSlot()
+                        ).getSavedStack(counter++)
+                );
+
+                layoutCounter.put(slotTypeChar, counter);
             }
 
             //we are over what was defined for this line, so the rest gets filled with default slots
+            int defaultCounter = layoutCounter.getOrDefault(' ', 0);
             for (; k < 9; k++)
             {
-                inv.setItem(k + offset, definitions.get(' ').getInitialContent());
+                inv.setItem(
+                        k + offset,
+                        definitions.get(' ').getSavedStack(defaultCounter++)
+                );
             }
+            layoutCounter.put(' ', defaultCounter);
         }
 
         //return the now filled inventory
@@ -227,9 +246,12 @@ public abstract class ChestUIHolder extends UniverseInventoryHolder {
     {
         for (var entry : definitions.entrySet())
         {
-            if(entry.getValue().getInitialContent().equals(comparator))
+            for(ItemStack stack : entry.getValue().getSavedContent())
             {
-                return entry.getKey();
+                if(stack.equals(comparator))
+                {
+                    return entry.getKey();
+                }
             }
         }
 

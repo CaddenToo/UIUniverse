@@ -9,9 +9,9 @@ import arnett.uIUniverse.commands.list.ListSlots;
 import arnett.uIUniverse.commands.OpenMenu;
 import arnett.uIUniverse.listeners.UIMenuListener;
 import arnett.uIUniverse.listeners.UISlotListener;
-import arnett.uIUniverse.ui.inventory.slotTypes.DisplaySlot;
+import arnett.uIUniverse.ui.inventory.slotTypes.DisplaySlotType;
 import arnett.uIUniverse.ui.inventory.slotTypes.SlotManager;
-import arnett.uIUniverse.ui.inventory.slotTypes.StorageSlot;
+import arnett.uIUniverse.ui.inventory.slotTypes.StorageSlotType;
 import arnett.uIUniverse.ui.inventory.MenuManager;
 import arnett.uIUniverse.ui.inventory.chestInvetory.menus.TestMenu;
 import cd.arnett.caddamands.cattamands.cattamand.LiteralCattamand;
@@ -40,8 +40,8 @@ public final class UIUniverse extends JavaPlugin {
         MenuManager.registerMenu(TestMenu.class);
 
         //register slot types
-        SlotManager.registerSlot(DisplaySlot.class);
-        SlotManager.registerSlot(StorageSlot.class);
+        SlotManager.registerSlot(DisplaySlotType.class);
+        SlotManager.registerSlot(StorageSlotType.class);
 
         new LiteralCattamand("uiuniverse", List.of(
                 new OpenMenu(),

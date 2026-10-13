@@ -1,26 +1,24 @@
 package arnett.uIUniverse.ui.inventory.slotTypes.buttons;
 
 import arnett.uIUniverse.ui.dialog.types.value.parameters.PromptInput;
-import arnett.uIUniverse.ui.inventory.slotTypes.BaseSlot;
-import arnett.uIUniverse.ui.inventory.slotTypes.DisplaySlot;
+import arnett.uIUniverse.ui.inventory.slotTypes.SlotType;
+import arnett.uIUniverse.ui.inventory.slotTypes.DisplaySlotType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class ButtonSlot extends DisplaySlot {
+public abstract class ButtonSlotType extends DisplaySlotType {
 
-    protected PromptInput<?>[] parameters;
+    protected PromptInput<?>[] parameters = getDefaultParameters();
+
     public abstract PromptInput<?>[] getDefaultParameters();
 
 
@@ -30,8 +28,9 @@ public abstract class ButtonSlot extends DisplaySlot {
                         -  Initialization  -
     =================================================================================================*/
 
+
     @Override
-    public BaseSlot readFromYaml(YamlConfiguration yaml) {
+    public SlotType readFromYaml(ConfigurationSection yaml) {
 
         //read the content
         super.readFromYaml(yaml);

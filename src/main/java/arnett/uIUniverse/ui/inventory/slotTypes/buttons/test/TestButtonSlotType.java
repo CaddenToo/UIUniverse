@@ -3,15 +3,13 @@ package arnett.uIUniverse.ui.inventory.slotTypes.buttons.test;
 import arnett.uIUniverse.UIUniverse;
 import arnett.uIUniverse.ui.dialog.types.value.parameters.PromptInput;
 import arnett.uIUniverse.ui.dialog.types.value.parameters.types.FloatPromptInput;
-import arnett.uIUniverse.ui.inventory.slotTypes.buttons.ButtonSlot;
+import arnett.uIUniverse.ui.inventory.slotTypes.buttons.ButtonSlotType;
 import org.bukkit.NamespacedKey;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
-public class TestButtonSlot extends ButtonSlot {
+public class TestButtonSlotType extends ButtonSlotType {
 
     @Override
     public void execute(Player player, Inventory inventory, int slot, PromptInput<?>... parameters) {

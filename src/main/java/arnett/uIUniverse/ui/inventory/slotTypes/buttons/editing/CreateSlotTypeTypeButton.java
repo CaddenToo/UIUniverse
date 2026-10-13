@@ -2,12 +2,12 @@ package arnett.uIUniverse.ui.inventory.slotTypes.buttons.editing;
 
 import arnett.uIUniverse.UIUniverse;
 import arnett.uIUniverse.ui.dialog.types.value.parameters.PromptInput;
-import arnett.uIUniverse.ui.inventory.slotTypes.buttons.ButtonSlot;
+import arnett.uIUniverse.ui.inventory.slotTypes.buttons.ButtonSlotType;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
-public class CreateSlotTypeButton extends ButtonSlot {
+public class CreateSlotTypeTypeButton extends ButtonSlotType {
     @Override
     public void execute(Player player, Inventory inventory, int slot, PromptInput<?>... parameters) {
 

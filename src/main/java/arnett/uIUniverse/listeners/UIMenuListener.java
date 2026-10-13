@@ -9,11 +9,12 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 
+import java.io.IOException;
+
 public class UIMenuListener implements Listener {
 
     @EventHandler
-    public void onMenuClose(InventoryCloseEvent e)
-    {
+    public void onMenuClose(InventoryCloseEvent e) throws IOException {
         if(e.getInventory().getHolder() instanceof UniverseInventoryHolder holder) {
             holder.onMenuClose(e);
         }

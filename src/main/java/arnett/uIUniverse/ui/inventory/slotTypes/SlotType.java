@@ -4,17 +4,19 @@ import net.kyori.adventure.text.TextComponent;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseSlot {
+public abstract class SlotType {
 
-    private ItemStack initialContent = ItemStack.empty();
+    private List<ItemStack> savedContent = List.of();
 
 
     //region Initialization
@@ -24,48 +26,81 @@ public abstract class BaseSlot {
     =================================================================================================*/
 
     /**
-     * @return Returns the inital content provided for this slot, DOES NOT HOLD WHAT IS CURRENTLY
-     * IN THIS SLOT IN THE INVENTORY
+     * @return Returns the saved content provided for this index of this slot type in the layout
+     * For example providing and apple and a diamond will first create an apple stack at index 1
+     * and then a diamond stack at index 2 regardless of where they are placed in the layout from
+     * left-right top-bottom
      */
-    public ItemStack getInitialContent()
+    public ItemStack getSavedStack(int index)
     {
-        return initialContent;
+        return savedContent.get(index);
     }
 
     /**
-     * To be called along with initialization, sets the itemStack to be in this slot's location.
-     * All overloads of this call this function.
-     * @param stack Stack to set to
+     * @return Returns the saved content provided for this slot type
+     */
+    public List<ItemStack> getSavedContent()
+    {
+        return List.copyOf(savedContent);
+    }
+
+    /**
+     * To be called along with initialization, sets the item stacks to be used for this slot types layout pattern.
+     * For example providing and apple and a diamond will first create an apple stack and then a diamond stack at the
+     * layout's next instance of this slot type. layout order follows left-right top-bottom
+     * @param content Stacks to set to
      * @return This object (for easier initialization)
      */
-    public BaseSlot setInitialContent(ItemStack stack)
+    public SlotType setSavedContent(List<ItemStack> content)
     {
-        this.initialContent = stack;
+        this.savedContent = content;
+        return this;
+    }
+
+    //region Overloads
+
+    //----------= Overloads =-----------------------------------------------------------------------------
+
+    /**
+     * To be called along with initialization, sets the item stacks to be used for this slot types layout pattern.
+     * For example providing and apple and a diamond will first create an apple stack and then a diamond stack at the
+     * layout's next instance of this slot type. layout order follows left-right top-bottom
+     * @param content Stack to set to
+     * @return This object (for easier initialization)
+     */
+    public SlotType setSavedContent(ItemStack content)
+    {
+        this.savedContent = List.of(content);
         return this;
     }
 
     /**
-     * To be called along with initialization, sets the itemStack to be in this slot's location
-     * @param contentMat material of the stack
-     * @param amount amount to set the stack to
+     * To be called along with initialization, sets the item stacks to be used for this slot types layout pattern.
+     * For example providing and apple and a diamond will first create an apple stack and then a diamond stack at the
+     * layout's next instance of this slot type. layout order follows left-right top-bottom
+     * @param mat material of the one itemstack
+     * @param amount numbebr of items in that stack
      * @return This object (for easier initialization)
      */
-    public BaseSlot setInitialContent(Material contentMat, int amount)
+    public SlotType setSavedContent(Material mat, int amount)
     {
-        setInitialContent(ItemStack.of(contentMat, amount));
+        this.savedContent = List.of(ItemStack.of(mat, amount));
         return this;
     }
 
+    //endregion
 
-    public BaseSlot clone()
+
+
+    public SlotType clone()
     {
-        return clone(initialContent);
+        return clone(savedContent);
     }
 
-    public BaseSlot clone(ItemStack otherContent)
+    public SlotType clone(List<ItemStack> otherContent)
     {
         try {
-            return getClass().getConstructor().newInstance().setInitialContent(otherContent);
+            return getClass().getConstructor().newInstance().setSavedContent(List.copyOf(otherContent));
         } catch (InstantiationException e) {
             throw new RuntimeException(e);
         } catch (IllegalAccessException e) {
@@ -87,9 +122,23 @@ public abstract class BaseSlot {
     =================================================================================================*/
 
 
-    public BaseSlot readFromYaml(YamlConfiguration yaml)
+    public SlotType readFromYaml(ConfigurationSection yaml)
     {
-        initialContent = yaml.getItemStack(getIdentifierAsYamlKey() + ".item");
+        ArrayList<ItemStack> content = new ArrayList<>();
+
+        ConfigurationSection itemsSection = yaml.getConfigurationSection(getIdentifierAsYamlKey() + ".items");
+
+        if(itemsSection == null)
+            return this;
+
+        var keys = itemsSection.getKeys(false);
+
+        for (int i = 0; i < keys.size(); i++) {
+            content.add(itemsSection.getItemStack(Integer.toString(i)));
+        }
+
+        savedContent = List.copyOf(content);
+
         return this;
     }
 
@@ -99,7 +148,11 @@ public abstract class BaseSlot {
 
         String key = getIdentifierAsYamlKey() + '.';
 
-        yaml.set(key + "item", initialContent);
+        int i = 0;
+        for (ItemStack stack : savedContent) {
+            yaml.set(key + "items." + i, stack);
+            i++;
+        }
 
         return yaml;
     }

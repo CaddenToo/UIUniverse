@@ -1,27 +1,71 @@
 package arnett.uIUniverse.listeners;
 
-import arnett.uIUniverse.ui.inventory.slotTypes.BaseSlot;
+import arnett.uIUniverse.ui.inventory.slotTypes.SlotType;
 import arnett.uIUniverse.ui.inventory.UniverseInventoryHolder;
-import io.papermc.paper.event.player.PlayerInventorySlotChangeEvent;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class UISlotListener implements Listener {
 
     @EventHandler
-    public void onClick(InventoryClickEvent e)
-    {
-        if(e.isCancelled())
-            return;
+    public void onClick(InventoryClickEvent e) {
+        if(e.isCancelled()) return;
+
+        Inventory topInventory = e.getInventory();
 
         //only continue for custom inventories
-        if (!(e.getInventory().getHolder() instanceof UniverseInventoryHolder holder))
+        if (!(topInventory.getHolder() instanceof UniverseInventoryHolder holder)) {
+            return;
+        }
+        if (!(e.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+
+        Inventory clickedInventory = e.getClickedInventory();
+        SlotType clickedSlot = holder.getBaseSlotSafe(e.getRawSlot());
+
+        // if we clicked an immovable slot, cancel the event and call its click function
+        if(!clickedSlot.isMovable())
+        {
+            e.setCancelled(true);
+            clickedSlot.onSelect(player, clickedInventory, e.getSlot());
+            return;
+        }
+
+        //other & bottom inventory useful for clicks that affect both
+        Inventory bottomInventory = e.getView().getBottomInventory();
+        Inventory otherInventory = clickedInventory == topInventory ? bottomInventory : topInventory;
+
+        //the slot clicked is moveable but the click type may affect others which are immovable
+        switch (e.getAction())
+        {
+            case MOVE_TO_OTHER_INVENTORY -> {
+                if(otherInventory instanceof UniverseInventoryHolder)
+                {
+                    e.setCancelled(true);
+                    holder.deposit(e.getCurrentItem());
+                }
+            }
+            case COLLECT_TO_CURSOR -> {
+                e.setCancelled(true);
+                holder.collectTo(e.getCursor(), bottomInventory);
+            }
+        }
+    }
+
+
+    public void onDrag(InventoryDragEvent e)
+    {
+        if(e.isCancelled()) return;
+
+        if(!(e.getInventory() instanceof UniverseInventoryHolder holder))
         {
             return;
         }
@@ -30,69 +74,50 @@ public class UISlotListener implements Listener {
             return;
         }
 
-        Inventory topInventory = e.getView().getTopInventory();
-        Inventory bottomInventory = e.getView().getBottomInventory();
-        int rawClickedSlot = e.getRawSlot();
+        //tracks whether any custom logic needs to be done
+        AtomicBoolean inUniverseInventory = new AtomicBoolean(false);
 
-        //only if we clicked in the top half of the inventory
-        if(rawClickedSlot >= 0 && rawClickedSlot < topInventory.getSize()) {
-            BaseSlot clickedSlot = holder.getBaseSlot(e.getSlot());
+        var deposits = e.getNewItems();
+        int oldSlotCount = deposits.size();
 
-            if (clickedSlot == null)
-            {
-                e.setCancelled(true);
-                return;
-            }
+        deposits.entrySet().removeIf((entry) -> {
 
-            clickedSlot.onSelect(player, topInventory, rawClickedSlot);
+            SlotType clickedSlot = holder.getBaseSlotSafe(entry.getKey());
 
-            //stop if this slot isn't movable
             if(!clickedSlot.isMovable())
             {
-                e.setCancelled(true);
-                return;
+                inUniverseInventory.set(true);
+                return true;
             }
-        }
 
-        //clicking inside player inventory, not menu
-        else
+            return false;
+        });
+
+        //redistribute items ourselves if in custom inventory
+        if(inUniverseInventory.get())
         {
-            switch (e.getAction())
-            {
-                //check for shift click into to menu
-                case MOVE_TO_OTHER_INVENTORY -> {
-                    e.setCancelled(true);
-                    holder.deposit(e.getCurrentItem());
-                }
+            e.setCancelled(true);
 
-                //check for double click pickup
-                case COLLECT_TO_CURSOR -> {
-                    if(e.getCurrentItem() == null || e.getCurrentItem().isEmpty())
-                    {
-                        return;
-                    }
+            ItemStack draggedStack = e.getOldCursor();
 
-                    //stop the event
-                    e.setCancelled(true);
+            int oldCount = draggedStack.getAmount();
+            int newCount = e.getCursor() == null ? 0 : e.getCursor().getAmount();
 
-                    //make a copy so we don't lose it when moved
-                    ItemStack currentItem = e.getCurrentItem().clone();
+            //amount deposited in each stack
+            int perSlotAmount = (oldCount - newCount) / oldSlotCount;
 
-                    //move all of similar type
-                    for(ItemStack stack : bottomInventory.getContents())
-                    {
-                        if(stack == null || stack.isEmpty())
-                        {
-                            continue;
-                        }
-                        else if(stack.isSimilar(currentItem))
-                        {
-                            holder.deposit(stack);
-                        }
-                    }
-                }
-            }
+            //amount that can't be deposited because it's slots are immovable
+            int refund = (deposits.size() - oldSlotCount) * perSlotAmount;
+
+            //deposit the rest of the times
+            deposits.forEach((index, stack) -> {
+                e.getView().setItem(index, stack);
+            });
+
+            ItemStack cursor = e.getCursor();
+            cursor.setAmount(newCount + refund);
+
+            player.setItemOnCursor(cursor);
         }
     }
-
 }

@@ -1,13 +1,12 @@
 package arnett.uIUniverse.ui.inventory.chestInvetory.menus;
 
 import arnett.uIUniverse.UIUniverse;
-import arnett.uIUniverse.ui.inventory.slotTypes.BaseSlot;
-import arnett.uIUniverse.ui.inventory.slotTypes.DisplaySlot;
-import arnett.uIUniverse.ui.inventory.slotTypes.buttons.test.TestButtonSlot;
+import arnett.uIUniverse.ui.inventory.slotTypes.SlotType;
+import arnett.uIUniverse.ui.inventory.slotTypes.DisplaySlotType;
+import arnett.uIUniverse.ui.inventory.slotTypes.buttons.test.TestButtonSlotType;
 import arnett.uIUniverse.ui.inventory.chestInvetory.ChestUIHolder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.List;
@@ -15,13 +14,9 @@ import java.util.Map;
 
 public class TestMenu extends ChestUIHolder {
 
-    public TestMenu(YamlConfiguration yaml) {
-        super(yaml);
-    }
-
     @Override
-    public BaseSlot getDefaultSlot() {
-        return new DisplaySlot();
+    public SlotType getDefaultSlot() {
+        return new DisplaySlotType();
     }
 
     @Override
@@ -34,10 +29,10 @@ public class TestMenu extends ChestUIHolder {
     }
 
     @Override
-    public Map<Character, BaseSlot> getDefaultDefinitions() {
+    public Map<Character, SlotType> getDefaultDefinitions() {
         return Map.of(
-                '1', new DisplaySlot(ItemStack.of(Material.ACACIA_BOAT)),
-                '2', new TestButtonSlot(ItemStack.of(Material.PALE_OAK_BOAT))
+                '1', new DisplaySlotType().setSavedContent(ItemStack.of(Material.ACACIA_BOAT)),
+                '2', new TestButtonSlotType().setSavedContent(ItemStack.of(Material.PALE_OAK_BOAT))
         );
     }
 

@@ -2,7 +2,8 @@ package arnett.uIUniverse.ui.inventory;
 
 import arnett.uIUniverse.UIUniverse;
 import arnett.uIUniverse.ui.inventory.helpers.ItemStackHelpers;
-import arnett.uIUniverse.ui.inventory.slotTypes.BaseSlot;
+import arnett.uIUniverse.ui.inventory.slotTypes.SlotType;
+import arnett.uIUniverse.ui.inventory.slotTypes.StorageSlotType;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -13,11 +14,8 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
-import java.awt.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.io.IOException;
+import java.util.*;
 
 public abstract class UniverseInventoryHolder implements InventoryHolder {
 
@@ -40,7 +38,7 @@ public abstract class UniverseInventoryHolder implements InventoryHolder {
             "         "
     };
 
-    public HashMap<Character, BaseSlot> definitions = new HashMap<>();
+    public HashMap<Character, SlotType> definitions = new HashMap<>();
 
     /**
      * @return menu key for access in the MenuManager
@@ -92,7 +90,7 @@ public abstract class UniverseInventoryHolder implements InventoryHolder {
     /**
      * @return By default, is set to an empty display slot, so items can not be placed inside.
      */
-    public abstract BaseSlot getDefaultSlot();
+    public abstract SlotType getDefaultSlot();
 
     /**
      * @return String layout of the inventory, similar to recipes,
@@ -112,7 +110,15 @@ public abstract class UniverseInventoryHolder implements InventoryHolder {
      * Similar to the Ingredients List with Recipes
      * The space key ' ' is reserved for default slots
      */
-    public abstract Map<Character, BaseSlot> getDefaultDefinitions();
+    public abstract Map<Character, SlotType> getDefaultDefinitions();
+
+    /**
+     * @return Does this save its contents on closing
+     */
+    public boolean getSaveOnClose()
+    {
+        return true;
+    }
 
     //endregion
 
@@ -125,12 +131,54 @@ public abstract class UniverseInventoryHolder implements InventoryHolder {
 
     /**
      * Gets the slot data for a specific slot
-     * @param slotNumber Slot number to check
+     * @param slotNumber Slot number to check, Will be one within inventory range
      * @return The slot data
      * @throws IndexOutOfBoundsException Thrown if index is out of bounds
      */
-    public abstract BaseSlot getBaseSlot(int slotNumber) throws IndexOutOfBoundsException;
+    protected abstract SlotType getSlotType(int slotNumber) throws IndexOutOfBoundsException;
 
+    /**
+     * Gets the slot data for a specific slot safely by first checking it's ranges
+     * @param slotNumber slot number to check
+     * @return baseSlot for this index, or an empty Storage slot if out of bounds
+     */
+    public SlotType getBaseSlotSafe(int slotNumber)
+    {
+        if(slotNumber < 0 || slotNumber > inventory.getSize())
+        {
+            return new StorageSlotType();
+        }
+
+        return getSlotType(slotNumber);
+    }
+
+
+    /**
+     * Resets all the base slot content to match the inventory for saving
+     */
+    public void saveToBaseSlots() {
+        Inventory inv = getInventory();
+
+        HashMap<SlotType, ArrayList<ItemStack>> heldContent = new HashMap<>();
+
+        for (int i = 0; i < inv.getSize(); i++) {
+
+            ItemStack stack = inv.getItem(i);
+            SlotType slot = getSlotType(i);
+
+            if(heldContent.containsKey(slot))
+            {
+                heldContent.get(slot).add(stack);
+            }
+            else
+            {
+                heldContent.put(slot, new ArrayList<>());
+                heldContent.get(slot).add(stack);
+            }
+        }
+
+        heldContent.forEach(SlotType::setSavedContent);
+    }
 
     /**
      * @return gets the inventory or creates on if not already built
@@ -167,11 +215,13 @@ public abstract class UniverseInventoryHolder implements InventoryHolder {
      * Called when a menu with this ID is closed
      */
     @OverridingMethodsMustInvokeSuper
-    public void onMenuClose(InventoryCloseEvent e) {
+    public void onMenuClose(InventoryCloseEvent e) throws IOException {
         //player is still counted as looking here
         if (getInventory().getViewers().size() <= 1)
         {
             MenuManager.activeInventories.remove(menuKey);
+            saveToBaseSlots();
+            MenuManager.overwriteMenuSave(this);
         }
     }
 
@@ -229,7 +279,7 @@ public abstract class UniverseInventoryHolder implements InventoryHolder {
         for (int i = 0; i < inventory.getSize(); i++)
         {
             ItemStack itemInSlot = inventory.getItem(i);
-            BaseSlot slotType = getBaseSlot(i);
+            SlotType slotType = getSlotType(i);
 
             //is this a moveable slot
             if(!slotType.isMovable())
@@ -264,6 +314,19 @@ public abstract class UniverseInventoryHolder implements InventoryHolder {
      */
     public void collectTo(ItemStack target)
     {
+        collectTo(target, null);
+    }
+
+    /**
+     * Collects all similar (moveable) item types to the target until the target has reached max stack size
+     * @param target Stack to collect to
+     * @param other Other inventory to also collect from, NOT another Universe Inventory holder
+     */
+    public void collectTo(ItemStack target, Inventory other)
+    {
+        if(target == null || target.isEmpty())
+            return;
+
         Inventory inventory = getInventory();
 
         //don't bother if we can't stack regardless
@@ -272,11 +335,36 @@ public abstract class UniverseInventoryHolder implements InventoryHolder {
             return;
         }
 
-        for (ItemStack stack : inventory)
+        //collect from this inventory
+        for (int i = 0; i < inventory.getSize(); i++)
         {
-            if(stack.isSimilar(target))
+            ItemStack slotItem = inventory.getItem(i);
+            SlotType slotType = getSlotType(i);
+
+            if(slotItem == null || !slotType.isMovable())
+                continue;
+
+            if(slotItem.isSimilar(target))
             {
-                if(ItemStackHelpers.stackSimilarItems(stack, target)) return;
+                if(ItemStackHelpers.stackSimilarItems(slotItem, target)) return;
+            }
+        }
+
+        //was another inventory passed
+        if(other == null)
+            return;
+
+        //collect from the other inventory
+        for (int i = 0; i < other.getSize(); i++)
+        {
+            ItemStack slotItem = other.getItem(i);
+
+            if(slotItem == null)
+                continue;
+
+            if(slotItem.isSimilar(target))
+            {
+                if(ItemStackHelpers.stackSimilarItems(slotItem, target)) return;
             }
         }
     }

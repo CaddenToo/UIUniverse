@@ -7,17 +7,17 @@ import java.util.HashMap;
 
 public class SlotManager {
 
-    public static HashMap<NamespacedKey, Class<? extends BaseSlot>> registeredSlotClasses = new HashMap<>();
+    public static HashMap<NamespacedKey, Class<? extends SlotType>> registeredSlotClasses = new HashMap<>();
 
-    public static void registerSlot(BaseSlot slot)
+    public static void registerSlot(SlotType slot)
     {
         registeredSlotClasses.put(slot.getIdentifier(), slot.getClass());
     }
 
-    public static void registerSlot(Class<? extends BaseSlot> slotClass) {
+    public static void registerSlot(Class<? extends SlotType> slotClass) {
 
         try {
-            BaseSlot shell = slotClass.getConstructor().newInstance();
+            SlotType shell = slotClass.getConstructor().newInstance();
             registeredSlotClasses.put(shell.getIdentifier(), slotClass);
         }
         catch (Exception e)
@@ -27,7 +27,7 @@ public class SlotManager {
         }
     }
 
-    public static Class<? extends BaseSlot> getSlotClass(NamespacedKey identifier)
+    public static Class<? extends SlotType> getSlotClass(NamespacedKey identifier)
     {
         return registeredSlotClasses.get(identifier);
     }

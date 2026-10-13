@@ -2,32 +2,14 @@ package arnett.uIUniverse.ui.inventory.slotTypes.buttons.editing;
 
 import arnett.uIUniverse.UIUniverse;
 import arnett.uIUniverse.ui.dialog.types.value.parameters.PromptInput;
-import arnett.uIUniverse.ui.inventory.slotTypes.buttons.ButtonSlot;
+import arnett.uIUniverse.ui.inventory.slotTypes.buttons.ButtonSlotType;
 import arnett.uIUniverse.ui.inventory.MenuManager;
 import arnett.uIUniverse.ui.inventory.chestInvetory.editor.ChestUIEditor;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
 
-public class SaveEditButton extends ButtonSlot {
-
-    public SaveEditButton(ItemStack displayItem) {
-        super(displayItem);
-    }
-
-    public SaveEditButton(Material contentMat, int amount) {
-        super(contentMat, amount);
-    }
-
-    public SaveEditButton(ConfigurationSection yaml) {
-        super(yaml);
-    }
-
-    public SaveEditButton() {
-    }
+public class SaveEditButton extends ButtonSlotType {
 
     @Override
     public void execute(Player player, Inventory inventory, int slot, PromptInput<?>... parameters) {
